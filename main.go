@@ -13,7 +13,7 @@ func init() {
 }
 
 func main() {
-	sleepTime := time.Duration(config.Conf.Interval) * time.Second
+	tick := time.NewTicker(time.Duration(config.Conf.Interval) * time.Second)
 	for {
 		publicIP := utils.GetPublicIP()
 		if publicIP == "" {
@@ -26,6 +26,9 @@ func main() {
 			log.Print("unable update record: ", err)
 		}
 		log.Printf("Retry in %d seconds ", config.Conf.Interval)
-		time.Sleep(sleepTime)
+		select {
+		case <-tick.C:
+
+		}
 	}
 }
