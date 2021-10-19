@@ -5,3 +5,7 @@ aliyun:
   access_key: xxx
   access_key_secret: xxx
   domain: xxx.example.com
+tencent:
+  secret_id: xxx
+  secret_key: xxx
+  domain: xxx.example.com
