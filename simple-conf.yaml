@@ -1,0 +1,7 @@
+interval: 600
+ip_api: http://ip.3322.net/
+aliyun:
+  region_id: cn-hangzhou
+  access_key: xxx
+  access_key_secret: xxx
+  domain: xxx.example.com
