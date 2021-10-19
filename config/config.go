@@ -26,6 +26,7 @@ func LoadConfig() {
 	confPath := flag.String("conf", "simple-conf.yaml", "path of config, default: simple-conf.yaml")
 	flag.Parse()
 
+	log.Print("load config: ", *confPath)
 	bytes, err := ioutil.ReadFile(*confPath)
 	if err != nil {
 		log.Fatalf("load config file [%s] faild: %s", *confPath, err.Error())
