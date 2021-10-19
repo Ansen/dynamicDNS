@@ -1,0 +1,13 @@
+[Unit]
+Description=Dynamic DNS
+
+[Service]
+User=nobody
+Type=simple
+ExecStart=/usr/local/bin/dynamicDNS --conf=/etc/dynamicDNS/conf.yaml
+Restart=always
+RestartSec=15s
+TimeoutSec=60s
+
+[Install]
+WantedBy=multi-user.target
