@@ -1,6 +1,8 @@
 package aliyun
 
 import (
+	"dynamicDNS/config"
+	"dynamicDNS/utils"
 	"fmt"
 	"log"
 	"strings"
@@ -10,30 +12,21 @@ import (
 
 type aliDnsClient struct {
 	client    *alidns.Client
-	option    Options
 	domain    string
 	subDomain string
 }
 
-type Options struct {
-	AccessKey       string `yaml:"access_key"`
-	AccessKeySecret string `yaml:"access_key_secret"`
-	RegionID        string `yaml:"region_id"`
-	Domain          string `yaml:"domain"`
-}
-
-func NewAliDnsClient(option Options) *aliDnsClient {
-	client, err := alidns.NewClientWithAccessKey(option.RegionID, option.AccessKey, option.AccessKeySecret)
+func NewAliDnsClient() *aliDnsClient {
+	client, err := alidns.NewClientWithAccessKey("cn-hangzhou", config.Conf.Aliyun.AccessKey, config.Conf.Aliyun.AccessKeySecret)
 	if err != nil {
-		log.Fatal("unable create alidns client: ", err)
+		log.Fatal("unable create aliyun dns client: ", err)
 		return nil
 	}
-	domain := strings.Split(option.Domain, ".")
+	domain := strings.Split(config.Conf.Aliyun.Domain, ".")
 	mainDomain := fmt.Sprintf("%s.%s", domain[1], domain[2])
 
 	return &aliDnsClient{
 		client:    client,
-		option:    option,
 		domain:    mainDomain,
 		subDomain: domain[0],
 	}
@@ -41,7 +34,7 @@ func NewAliDnsClient(option Options) *aliDnsClient {
 
 func (a *aliDnsClient) getSubDomainRecord() ([]alidns.Record, error) {
 	request := alidns.CreateDescribeSubDomainRecordsRequest()
-	request.SubDomain = a.option.Domain
+	request.SubDomain = config.Conf.Aliyun.Domain
 	request.DomainName = a.domain
 	response, err := a.client.DescribeSubDomainRecords(request)
 	if err != nil {
@@ -63,7 +56,7 @@ func (a *aliDnsClient) addSubDomainRecord(value string) error {
 		log.Print("response detail: ", response.String())
 		return err
 	}
-	log.Printf("%s added, value: %s, requestID: %s", a.option.Domain, value, response.RequestId)
+	log.Printf("%s added, value: %s, requestID: %s", config.Conf.Aliyun.Domain, value, response.RequestId)
 	return nil
 }
 
@@ -78,11 +71,14 @@ func (a *aliDnsClient) updateSubDomainRecord(recordId, value string) error {
 		log.Print("unable add domain record:", err)
 		return err
 	}
-	log.Printf("%s updated, value: %s, requestID: %s", a.option.Domain, value, response.RequestId)
+	log.Printf("%s updated, value: %s, requestID: %s", config.Conf.Aliyun.Domain, value, response.RequestId)
 	return nil
 }
 
 func (a *aliDnsClient) DynamicDNS(ip string) error {
+	if ip == "" {
+		return utils.PublicIPEmpty
+	}
 	records, err := a.getSubDomainRecord()
 	if err != nil {
 		return err
@@ -93,12 +89,11 @@ func (a *aliDnsClient) DynamicDNS(ip string) error {
 	case 1:
 		record := records[0]
 		if record.Value == ip {
-			log.Print("No change, Skip.")
+			log.Print(utils.NoChangeSkip.Error())
 			return nil
 		}
 		return a.updateSubDomainRecord(record.RecordId, ip)
 	default:
-		log.Printf("Does not support updating multiple records")
-		return nil
+		return utils.UnSupportMultiRecord
 	}
 }
