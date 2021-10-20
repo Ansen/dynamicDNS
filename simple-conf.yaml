@@ -1,11 +1,11 @@
 interval: 600
 ip_api: http://ip.3322.net/
 aliyun:
-  region_id: cn-hangzhou
   access_key: xxx
   access_key_secret: xxx
   domain: xxx.example.com
 tencent:
-  secret_id: xxx
-  secret_key: xxx
+#  dnspod token
+  access_key: xxx
+  access_key_secret: xxx
   domain: xxx.example.com

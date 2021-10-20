@@ -3,4 +3,4 @@
 supported：
 
 - aliyun dns
-- dnspod (come soon)
+- tencent dnspod

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"dynamicDNS/aliyun"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -10,14 +9,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type dnspod struct {
+type config struct {
+	Aliyun   Option `yaml:"aliyun"`
+	Tencent  Option `yaml:"tencent"`
+	Interval int    `yaml:"interval"`
+	IPApi    string `yaml:"ip_api"`
 }
 
-type config struct {
-	Aliyun   aliyun.Options `yaml:"aliyun"`
-	Dnspod   dnspod         `yaml:"dnspod"`
-	Interval int            `yaml:"interval"`
-	IPApi    string         `yaml:"ip_api"`
+type Option struct {
+	AccessKey       string `yaml:"access_key"`
+	AccessKeySecret string `yaml:"access_key_secret"`
+	Domain          string `yaml:"domain"`
 }
 
 var Conf config
@@ -37,27 +39,32 @@ func LoadConfig() {
 		log.Fatalf("parses [%s] faild: %s", *confPath, err.Error())
 	}
 	if Conf.Interval == 0 {
+		log.Print("set default interval: 600")
 		Conf.Interval = 600
 	}
 
-	checkAliyun()
+	notConfig := Option{}
+	if Conf.Aliyun != notConfig {
+		checkOption(&Conf.Aliyun)
+	}
+
+	if Conf.Tencent != notConfig {
+		checkOption(&Conf.Tencent)
+	}
 
 }
 
-func checkAliyun() {
-	if Conf.Aliyun.AccessKey == "" {
+func checkOption(option *Option) {
+	if option.AccessKey == "" {
 		log.Fatalf("access_key can not by empty")
 	}
-	if Conf.Aliyun.AccessKeySecret == "" {
+	if option.AccessKeySecret == "" {
 		log.Fatalf("access_key_secret can not by empty")
 	}
-	if Conf.Aliyun.RegionID == "" {
-		log.Fatalf("region_id can not by empty")
-	}
-	if Conf.Aliyun.Domain == "" {
+	if option.Domain == "" {
 		log.Fatalf("domain can not by empty")
 	}
-	if len(strings.Split(Conf.Aliyun.Domain, ".")) != 3 {
+	if len(strings.Split(option.Domain, ".")) != 3 {
 		log.Fatal("Invalid domain name: ", Conf.Aliyun.Domain)
 	}
 }
