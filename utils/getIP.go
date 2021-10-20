@@ -12,15 +12,10 @@ import (
 // GetPublicIP 本机外网IP
 func GetPublicIP() string {
 	IPAddr := ""
-	url := config.Conf.IPApi
-	if url == "" {
-		url = "http://ip.3322.net/"
-	}
-
 	client := http.Client{
 		Timeout: 3 * time.Second,
 	}
-	resp, err := client.Get(url)
+	resp, err := client.Get(config.Conf.IPApi)
 	if err != nil {
 		log.Println(err)
 		return IPAddr

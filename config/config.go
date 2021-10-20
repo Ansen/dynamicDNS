@@ -42,6 +42,9 @@ func LoadConfig() {
 		log.Print("set default interval: 600")
 		Conf.Interval = 600
 	}
+	if Conf.IPApi == "" {
+		Conf.IPApi = "http://ip.3322.net/"
+	}
 
 	notConfig := Option{}
 	if Conf.Aliyun != notConfig {
