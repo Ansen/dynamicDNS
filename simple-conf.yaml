@@ -1,5 +1,8 @@
 interval: 600
-ip_api: http://ip.3322.net/
+ipv4_api: http://101.37.19.207/getip
+ipv6_api: http://checkipv6.dyndns.com
+ipv_4: true
+ipv_6: false
 aliyun:
   access_key: xxx
   access_key_secret: xxx
