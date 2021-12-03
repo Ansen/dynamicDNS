@@ -1,5 +1,5 @@
 interval: 600
-ipv4_api: http://101.37.19.207/getip
+ipv4_api: http://ip.3322.net
 ipv6_api: http://checkipv6.dyndns.com
 ipv_4: true
 ipv_6: false
