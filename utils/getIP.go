@@ -1,21 +1,19 @@
 package utils
 
 import (
-	"dynamicDNS/config"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
 // GetPublicIP 本机外网IP
-func GetPublicIP() string {
+func GetPublicIP(url string) string {
 	IPAddr := ""
 	client := http.Client{
 		Timeout: 3 * time.Second,
 	}
-	resp, err := client.Get(config.Conf.IPApi)
+	resp, err := client.Get(url)
 	if err != nil {
 		log.Println(err)
 		return IPAddr
@@ -29,8 +27,5 @@ func GetPublicIP() string {
 		return IPAddr
 	}
 
-	IPAddr = string(s)
-	IPAddr = strings.Trim(IPAddr, "\n")
-	IPAddr = strings.Trim(IPAddr, " ")
-	return IPAddr
+	return string(s)
 }

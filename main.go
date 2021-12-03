@@ -26,9 +26,26 @@ func main() {
 	tick := time.NewTicker(time.Duration(config.Conf.Interval) * time.Second)
 
 	for {
-		publicIP := utils.GetPublicIP()
-		if publicIP == "" {
-			log.Print("unable get public ip")
+		ipv4 := ""
+		if *config.Conf.IPV4 {
+			response := utils.GetPublicIP(config.Conf.IPv4Api)
+			ipv4 = utils.GetIPv4(response)
+		}
+
+		ipv6 := ""
+		if *config.Conf.IPV6 {
+			response := utils.GetPublicIP(config.Conf.IPv6Api)
+			ipv6 = utils.GetIPv6(response)
+		}
+
+		if *config.Conf.IPV4 && ipv4 == "" {
+			log.Print("unable get public ipv4")
+			ticker(tick)
+			continue
+		}
+
+		if *config.Conf.IPV6 && ipv6 == "" {
+			log.Print("unable get public ipv6")
 			ticker(tick)
 			continue
 		}
@@ -36,7 +53,7 @@ func main() {
 		if config.Conf.Aliyun != notConfig {
 			log.Print("start handle ali yun dynamic dns...")
 			ali := aliyun.NewAliDnsClient()
-			err := ali.DynamicDNS(publicIP)
+			err := ali.DynamicDNS(ipv4, ipv6)
 			if err != nil {
 				log.Print("unable update ali dns record: ", err)
 			}
@@ -44,7 +61,7 @@ func main() {
 		if config.Conf.Tencent != notConfig {
 			log.Print("start handle tencent dynamic dns...")
 			tencentClient := tencent.NewDnspodApi()
-			err := tencentClient.DynamicDNS(publicIP)
+			err := tencentClient.DynamicDNS(ipv4, ipv6)
 			if err != nil {
 				log.Print("unable update dnspod recode: ", err)
 			}

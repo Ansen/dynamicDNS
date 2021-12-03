@@ -92,14 +92,14 @@ func (d *dnspodApi) getSubdomainRecord() ([]record, error) {
 	return content.Records, nil
 }
 
-func (d *dnspodApi) addSubDomainRecord(value string) (record, error) {
+func (d *dnspodApi) addSubDomainRecord(recordType, value string) (record, error) {
 	log.Print("start add record ...")
 	resp, err := http.PostForm(recordCreate, url.Values{
 		"login_token": {d.loginToken},
 		"format":      {d.format},
 		"domain":      {d.domain},
 		"sub_domain":  {d.subDomain},
-		"record_type": {"A"},
+		"record_type": {recordType},
 		"value":       {value},
 		"record_line": {"默认"},
 	})
@@ -124,7 +124,7 @@ func (d *dnspodApi) addSubDomainRecord(value string) (record, error) {
 	return content.Record, nil
 }
 
-func (d *dnspodApi) updateSubDomainRecord(id, value string) (modifyRecord, error) {
+func (d *dnspodApi) updateSubDomainRecord(id, recordType, value string) (modifyRecord, error) {
 	log.Print("start update record ...")
 	resp, err := http.PostForm(recordModify, url.Values{
 		"login_token": {d.loginToken},
@@ -132,7 +132,7 @@ func (d *dnspodApi) updateSubDomainRecord(id, value string) (modifyRecord, error
 		"domain":      {d.domain},
 		"sub_domain":  {d.subDomain},
 		"record_id":   {id},
-		"record_type": {"A"},
+		"record_type": {recordType},
 		"value":       {value},
 		"record_line": {"默认"},
 	})
@@ -156,8 +156,8 @@ func (d *dnspodApi) updateSubDomainRecord(id, value string) (modifyRecord, error
 	return content.Record, nil
 }
 
-func (d *dnspodApi) DynamicDNS(ip string) error {
-	if ip == "" {
+func (d *dnspodApi) DynamicDNS(ipv4, ipv6 string) error {
+	if ipv4 == "" && ipv6 == "" {
 		return utils.PublicIPEmpty
 	}
 
@@ -167,21 +167,31 @@ func (d *dnspodApi) DynamicDNS(ip string) error {
 	}
 	switch len(records) {
 	case 0:
-		added, err := d.addSubDomainRecord(ip)
-		if err != nil {
-			return err
+		if ipv4 != "" {
+			if _, err := d.addSubDomainRecord("A", ipv4); err != nil {
+				return err
+			}
 		}
-		log.Printf("added: %s => %s", added.Name, ip)
+		if ipv6 != "" {
+			if _, err := d.addSubDomainRecord("AAAA", ipv6); err != nil {
+				return err
+			}
+		}
 	case 1:
-		if ip == records[0].Value {
-			log.Print(utils.NoChangeSkip.Error())
-			return nil
+		if records[0].Type == "A" && ipv4 != "" {
+			if ipv4 != "" {
+				if _, err := d.updateSubDomainRecord(records[0].ID, "A", ipv4); err != nil {
+					return err
+				}
+			}
 		}
-		modify, err := d.updateSubDomainRecord(records[0].ID, ip)
-		if err != nil {
-			return err
+		if records[0].Type == "AAAA" && ipv6 != "" {
+			if ipv6 != "" {
+				if _, err := d.updateSubDomainRecord(records[0].ID, "AAAA", ipv6); err != nil {
+					return err
+				}
+			}
 		}
-		log.Printf("updated: %s => %s", modify.Name, modify.Value)
 	default:
 		return utils.UnSupportMultiRecord
 	}

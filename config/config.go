@@ -13,7 +13,10 @@ type config struct {
 	Aliyun   Option `yaml:"aliyun"`
 	Tencent  Option `yaml:"tencent"`
 	Interval int    `yaml:"interval"`
-	IPApi    string `yaml:"ip_api"`
+	IPv4Api  string `yaml:"ipv4_api"`
+	IPv6Api  string `yaml:"ipv6_api"`
+	IPV4     *bool  `yaml:"ipv_4"`
+	IPV6     *bool  `yaml:"ipv_6"`
 }
 
 type Option struct {
@@ -42,8 +45,18 @@ func LoadConfig() {
 		log.Print("set default interval: 600")
 		Conf.Interval = 600
 	}
-	if Conf.IPApi == "" {
-		Conf.IPApi = "http://ip.3322.net/"
+
+	if Conf.IPv4Api == "" && Conf.IPv6Api == "" {
+		Conf.IPv4Api = "http://ip.3322.net/"
+	}
+
+	if *Conf.IPV4 == false && *Conf.IPV6 == false {
+		*Conf.IPV4 = true
+		log.Println("set default ipv4")
+	}
+
+	if Conf.IPv6Api == "" && *Conf.IPV6 {
+		Conf.IPv6Api = Conf.IPv4Api
 	}
 
 	notConfig := Option{}
