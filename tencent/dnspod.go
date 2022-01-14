@@ -178,23 +178,19 @@ func (d *dnspodApi) DynamicDNS(ipv4, ipv6 string) error {
 			}
 		}
 	case 1:
-		if records[0].Type == "A" && ipv4 != "" {
-			if ipv4 != "" {
-				if _, err := d.updateSubDomainRecord(records[0].ID, "A", ipv4); err != nil {
-					return err
-				}
+		if records[0].Type == "A" && ipv4 != records[0].Value {
+			if _, err := d.updateSubDomainRecord(records[0].ID, "A", ipv4); err != nil {
+				return err
 			}
-		}
-		if records[0].Type == "AAAA" && ipv6 != "" {
-			if ipv6 != "" {
-				if _, err := d.updateSubDomainRecord(records[0].ID, "AAAA", ipv6); err != nil {
-					return err
-				}
+		} else if records[0].Type == "AAAA" && ipv6 != records[0].Value {
+			if _, err := d.updateSubDomainRecord(records[0].ID, "AAAA", ipv6); err != nil {
+				return err
 			}
+		} else {
+			log.Print("no need update")
 		}
 	default:
 		return utils.UnSupportMultiRecord
 	}
-
 	return nil
 }

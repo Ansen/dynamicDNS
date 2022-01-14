@@ -94,9 +94,10 @@ func (a *aliDnsClient) DynamicDNS(ipv4, ipv6 string) error {
 		record := records[0]
 		if record.Type == "A" && record.Value != ipv4 {
 			return a.updateSubDomainRecord(record.RecordId, record.Type, ipv4)
-		}
-		if record.Type == "AAAA" && record.Value != ipv6 {
+		} else if record.Type == "AAAA" && record.Value != ipv6 {
 			return a.updateSubDomainRecord(record.RecordId, record.Type, ipv6)
+		} else {
+			log.Print("no need to update")
 		}
 	case 2:
 		var err error
