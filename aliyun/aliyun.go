@@ -83,6 +83,11 @@ func (a *aliDnsClient) DynamicDNS(ipv4, ipv6 string) error {
 	if err != nil {
 		return err
 	}
+
+	for _, record := range records {
+		log.Printf("remote record type: %s, value: %s", record.Type, record.Value)
+	}
+
 	switch len(records) {
 	case 0:
 		if ipv4 != "" {
@@ -97,7 +102,7 @@ func (a *aliDnsClient) DynamicDNS(ipv4, ipv6 string) error {
 		} else if record.Type == "AAAA" && record.Value != ipv6 {
 			return a.updateSubDomainRecord(record.RecordId, record.Type, ipv6)
 		} else {
-			log.Print("no need to update")
+			log.Print("remote ip is same as local ip, skip update")
 		}
 	case 2:
 		var err error

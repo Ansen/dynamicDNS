@@ -165,6 +165,9 @@ func (d *dnspodApi) DynamicDNS(ipv4, ipv6 string) error {
 	if err != nil {
 		return err
 	}
+	for _, record := range records {
+		log.Printf("remote record Type: %s, Value: %s, Enabled: %s", record.Type, record.Value, record.Enabled)
+	}
 	switch len(records) {
 	case 0:
 		if ipv4 != "" {
@@ -187,7 +190,7 @@ func (d *dnspodApi) DynamicDNS(ipv4, ipv6 string) error {
 				return err
 			}
 		} else {
-			log.Print("no need update")
+			log.Print("remote ip is same as local ip, skip update")
 		}
 	default:
 		return utils.UnSupportMultiRecord

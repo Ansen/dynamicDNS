@@ -30,12 +30,14 @@ func main() {
 		if *config.Conf.IPV4 {
 			response := utils.GetPublicIP(config.Conf.IPv4Api)
 			ipv4 = utils.GetIPv4(response)
+			log.Print("local ipv4: ", ipv4)
 		}
 
 		ipv6 := ""
 		if *config.Conf.IPV6 {
 			response := utils.GetPublicIP(config.Conf.IPv6Api)
 			ipv6 = utils.GetIPv6(response)
+			log.Print("local ipv6: ", ipv6)
 		}
 
 		if *config.Conf.IPV4 && ipv4 == "" {
